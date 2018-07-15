@@ -14,7 +14,7 @@ app.get('/', (req, res) => {
 });
 
 app.get('/game', (req, res) => {
-  res.render('game', {game: res.query});
+  res.render('game', {game: req.query});
 });
 
 app.listen(3000, () => {
