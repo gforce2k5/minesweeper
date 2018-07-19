@@ -86,7 +86,7 @@ showSpace = (x, y) => {
     for (let i = x - 1; i <= x + 1; i++) {
       if (!mines[i]) continue;
       for (let j = y - 1; j <= y + 1; j++) {
-        if (mines[i][j] === 0) {
+        if (mines[i][j] >= 0) {
           showSpace(i, j);
         }
       }
