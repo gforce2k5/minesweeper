@@ -1,4 +1,4 @@
-const mines = new Array(height);
+const mines = new Array(width);
 const colors = [
   '#FFF',
   '#0224E8',
@@ -13,7 +13,7 @@ const colors = [
 
 init = () => {
   for (let i = 0; i < width; i++) {
-    mines[i] = new Array(width);
+    mines[i] = new Array(height);
   }
 
   for (let i = 0; i < numOfMines; i++) {
@@ -48,16 +48,17 @@ init = () => {
 const fields = document.querySelectorAll('.field');
 fields.forEach((el) => {
   el.addEventListener('click', () => {
+    if (el.classList.contains('pressed')) return;
     const coords = getCoordinates(el.id);
     const x = coords[0];
     const y = coords[1];
-    el.classList.add('pressed');
     if (mines[x][y] === 0) {
-      el.textContent = mines[x][y];
-      showMines(x, y);
+      showSpace(x, y);
     } else if (mines[x][y] === 9) {
+      el.classList.add('pressed');
       el.classList.add('mine');
     } else {
+      el.classList.add('pressed');
       el.textContent = mines[x][y];
       el.style.color = colors[mines[x][y]];
     }
@@ -69,16 +70,24 @@ getCoordinates = (id) => {
   return [parseInt(coords[0]), parseInt(coords[1])];
 };
 
-showMines = (x, y) => {
-  if (isPressed(x, y)) return;
-  pressed[x][y] = true;
-  tileSelector(x, y).classList.add('pressed');
+revealNumber = (x, y) => {
+  const tile = tileSelector(x, y);
+  if (mines[x][y] > 0 && mines[x][y] < 9) {
+    tile.textContent = mines[x][y];
+  }
+  tile.style.color = colors[mines[x][y]];
+  tile.classList.add('pressed');
+};
+
+showSpace = (x, y) => {
+  if (isPressed(x, y) || mines[x][y] === 9) return;
+  revealNumber(x, y);
   if (mines[x][y] === 0) {
     for (let i = x - 1; i <= x + 1; i++) {
       if (!mines[i]) continue;
-      for (let j = y - 1; j <= x + 1; j++) {
-        if (mines[i][j]) {
-          showMines(i, j);
+      for (let j = y - 1; j <= y + 1; j++) {
+        if (mines[i][j] || mines[i][j] === 0) {
+          showSpace(i, j);
         }
       }
     }
@@ -91,7 +100,7 @@ tileSelector = (x, y) => {
 
 isPressed = (x, y) => {
   const tile = tileSelector(x, y);
-  return tile.classList.contains('pressed') || tile.contains('mine');
+  return tile.classList.contains('pressed') || tile.classList.contains('mine');
 };
 
 init();
