@@ -15,8 +15,17 @@
   border-left: 1px solid black;
   width: 20px;
   height: 20px;
+  background-color: #999;
 }
 
 .clear-float {
   clear: both;
+}
+
+.pressed {
+  background-color: #FFF;
+}
+
+.mine {
+  background-color: #000;
 }

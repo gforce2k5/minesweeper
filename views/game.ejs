@@ -6,7 +6,7 @@
     <div class="board" style="width: <%= 20 * game.width + 2 %>px">
       <% for (let i = 0; i < game.height; i++) { %>
         <% for (let j = 0; j < game.width; j++) { %>
-          <div class="field float-left" id="<%= i %>,<%= j %>"></div>
+          <div class="field float-left" id="<%= i %>-<%= j %>"></div>
         <% } %>
         <div class="clear-float"></div>
       <% } %>
