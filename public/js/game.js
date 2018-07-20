@@ -1,19 +1,24 @@
 const mines = new Array(width);
+const flags = new Array(width);
 const colors = [
   '#FFF',
   '#0224E8',
   '#417B34',
   '#E83635',
+  '#01007B',
+  '#76150E',
+  '#377E80',
   '#000',
-  '#000',
-  '#000',
-  '#000',
-  '#000',
+  '#808080',
 ];
 
+let gameState;
+
 init = () => {
+  gameState = 0;
   for (let i = 0; i < width; i++) {
     mines[i] = new Array(height);
+    flags[i] = new Array(height);
   }
 
   for (let i = 0; i < numOfMines; i++) {
@@ -48,10 +53,20 @@ init = () => {
 const fields = document.querySelectorAll('.field');
 fields.forEach((el) => {
   el.addEventListener('click', () => {
-    if (el.classList.contains('pressed')) return;
+    if (gameState === 0) {
+      gameState === 1;
+    }
     const coords = getCoordinates(el.id);
     const x = coords[0];
     const y = coords[1];
+    if (el.classList.contains('pressed')) {
+      if (mines[x][y] > 0 && mines[x][y] < 9) {
+        if (countFlags(x, y) === mines[x][y]) {
+          showSpace(x, y, false);
+        }
+      }
+      return;
+    }
     if (mines[x][y] === 0) {
       showSpace(x, y);
     } else if (mines[x][y] === 9) {
@@ -79,8 +94,8 @@ revealNumber = (x, y) => {
   tile.classList.add('pressed');
 };
 
-showSpace = (x, y) => {
-  if (isPressed(x, y) || mines[x][y] === 9) return;
+showSpace = (x, y, ignoewMines = true) => {
+  if (isPressed(x, y) || (ignoreMines && mines[x][y] === 9)) return;
   revealNumber(x, y);
   if (mines[x][y] === 0) {
     for (let i = x - 1; i <= x + 1; i++) {
