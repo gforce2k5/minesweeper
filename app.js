@@ -23,6 +23,6 @@ app.get('/game', (req, res) => {
   res.render('game', {game: req.query});
 });
 
-app.listen(3000, () => {
+app.listen(process.env.PORT || 5000, () => {
   console.log('Server running');
 });
