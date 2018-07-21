@@ -3,6 +3,13 @@
     evt.preventDefault();
     evt.stopPropagation();
   });
+
+  document.querySelector('#message').addEventListener('click', (evt) => {
+    if (evt.target.matches('#new-game')) {
+      newGame();
+    }
+  });
+
   const mines = new Array(width);
   const flags = new Array(width);
   const colors = [
@@ -22,6 +29,8 @@
   let timer;
 
   init = () => {
+    document.querySelector('#timer').textContent = '0.0';
+    document.querySelector('#message').textContent = '';
     gameState = 0;
     for (let i = 0; i < width; i++) {
       mines[i] = new Array(height);
@@ -88,6 +97,7 @@
           gameState = 2;
           clearInterval(timer);
           showAllMines();
+          showMessage('You Lost! Pleaae try again', 'danger');
         } else {
           el.classList.add('pressed');
           el.textContent = mines[x][y];
@@ -95,8 +105,9 @@
           if (checkVictory()) {
             gameState = 2;
             showAllMines();
+            const elapsed = document.querySelector('#timer').textContent;
+            showMessage(`You Won! Your time is ${elapsed} seconds!`, 'success');
             clearInterval(timer);
-            alert('You Won!');
           }
         }
       } else if (evt.button === 2) {
@@ -130,6 +141,7 @@
       gameState = 2;
       clearInterval(timer);
       showAllMines();
+      showMessage('You Lost! Pleaae try again', 'danger');
       return;
     }
     revealNumber(x, y);
@@ -198,6 +210,25 @@
       }
       document.querySelector('#timer').textContent = elapsed;
     }, 100);
+  };
+
+  showMessage = (msg, alertType) => {
+    document.querySelector('#message').innerHTML = `
+      <div class="alert alert-${alertType}">
+        <p>${msg}</p>
+        <button id="new-game" class="btn btn-${alertType}">New Game</button>
+      </div>
+    `;
+  };
+
+  newGame = () => {
+    for (let i = 0; i < width; i++) {
+      for (let j = 0; j < height; j++) {
+        tileSelector(i, j).classList.remove('pressed', 'mine', 'flag');
+        tileSelector(i, j).textContent = '';
+      }
+    }
+    init();
   };
 
   init();
