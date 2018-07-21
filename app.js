@@ -12,6 +12,14 @@ app.get('/', (req, res) => {
 });
 
 app.get('/game', (req, res) => {
+  if (req.query.width < 5 || req.query.width > 50 ||
+      req.query.height < 5 || req.query.height > 50) {
+    return res.redirect('/');
+  }
+  if (req.query.mines < 5 || req.query.mines > 999 ||
+      req.query.mines >= req.query.width * req.query.height) {
+    return res.redirect('/');
+  }
   res.render('game', {game: req.query});
 });
 

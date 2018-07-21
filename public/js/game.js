@@ -1,4 +1,8 @@
 {
+  document.querySelector('.board').addEventListener('contextmenu', (evt) => {
+    evt.preventDefault();
+    evt.stopPropagation();
+  });
   const mines = new Array(width);
   const flags = new Array(width);
   const colors = [
@@ -66,12 +70,12 @@
       const coords = getCoordinates(el.id);
       const x = coords[0];
       const y = coords[1];
-      if (evt.button === 1) {
+      if (evt.button === 0) {
         if (el.classList.contains('flag')) return;
         if (el.classList.contains('pressed')) {
           if (mines[x][y] > 0 && mines[x][y] < 9) {
             if (countFlags(x, y) === mines[x][y]) {
-              showSpace(x, y, false);
+              showSpace(x, y, false, true);
             }
           }
           return;
@@ -91,11 +95,14 @@
           if (checkVictory()) {
             gameState = 2;
             showAllMines();
+            clearInterval(timer);
+            alert('You Won!');
           }
         }
       } else if (evt.button === 2) {
         if (el.classList.contains('pressed')) return;
         el.classList.toggle('flag');
+        flags[x][y] = el.classList.contains('flag');
       }
     });
   });
@@ -114,15 +121,24 @@
     tile.classList.add('pressed');
   };
 
-  showSpace = (x, y, ignoreMines = true) => {
-    if (isPressed(x, y) || (ignoreMines && mines[x][y] === 9)) return;
+  showSpace = (x, y, ignoreMines = true, numberPressed = false) => {
+    if (ignoreMines && isPressed(x, y) || (flags[x] && flags[x][y]) ||
+        (ignoreMines && !numberPressed && mines[x][y] === 9)) {
+      return;
+    }
+    if (numberPressed && mines[x][y] === 9 && !flags[x][y]) {
+      gameState = 2;
+      clearInterval(timer);
+      showAllMines();
+      return;
+    }
     revealNumber(x, y);
-    if (mines[x][y] === 0) {
+    if (mines[x][y] === 0 || !ignoreMines) {
       for (let i = x - 1; i <= x + 1; i++) {
         if (!mines[i]) continue;
         for (let j = y - 1; j <= y + 1; j++) {
           if (mines[i][j] >= 0) {
-            showSpace(i, j);
+            showSpace(i, j, true, numberPressed);
           }
         }
       }
@@ -142,8 +158,11 @@
   showAllMines = () => {
     for (let i = 0; i < width; i++) {
       for (let j = 0; j < height; j++) {
-        if (mines[i][j] === 9) {
+        if (mines[i][j] === 9 && !flags[i][j]) {
           tileSelector(i, j).classList.add('mine');
+        }
+        if (flags[i][j] && mines[i][j] !== 9) {
+          tileSelector(i, j).innerHTML = '<i class="fas fa-times"></i>';
         }
       }
     }
@@ -151,13 +170,23 @@
 
   checkVictory = () => {
     const fields = document.querySelectorAll('.field:not(.pressed)');
-    for (let i = 0; i < fields.length; i++) {
-      const coords = getCoordinates(fields[i]);
-      const x = coords[0];
-      const y = coords[1];
-      if (mines[x][y] !== 9) return false;
+    if (fields.length === numOfMines) {
+      return true;
     }
-    return true;
+    return false;
+  };
+
+  countFlags = (x, y) => {
+    let numOfFlags = 0;
+    for (let i = x - 1; i <= x + 1; i++) {
+      if (!flags[i]) continue;
+      for (let j = y - 1; j <= y + 1; j++) {
+        if (flags[i][j]) {
+          numOfFlags++;
+        }
+      }
+    }
+    return numOfFlags;
   };
 
   runTimer = () => {
