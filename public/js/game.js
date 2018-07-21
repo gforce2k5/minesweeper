@@ -14,6 +14,8 @@
   ];
 
   let gameState = 0;
+  let start;
+  let timer;
 
   init = () => {
     gameState = 0;
@@ -53,34 +55,47 @@
 
   const fields = document.querySelectorAll('.field');
   fields.forEach((el) => {
-    el.addEventListener('click', () => {
+    el.addEventListener('mousedown', (evt) => {
       if (gameState === 0) {
-        gameState === 1;
+        start = new Date().getTime();
+        timer = runTimer();
+        gameState = 1;
       } else if (gameState === 2) {
         return;
       }
       const coords = getCoordinates(el.id);
       const x = coords[0];
       const y = coords[1];
-      if (el.classList.contains('pressed')) {
-        if (mines[x][y] > 0 && mines[x][y] < 9) {
-          if (countFlags(x, y) === mines[x][y]) {
-            showSpace(x, y, false);
+      if (evt.button === 1) {
+        if (el.classList.contains('flag')) return;
+        if (el.classList.contains('pressed')) {
+          if (mines[x][y] > 0 && mines[x][y] < 9) {
+            if (countFlags(x, y) === mines[x][y]) {
+              showSpace(x, y, false);
+            }
+          }
+          return;
+        }
+        if (mines[x][y] === 0) {
+          showSpace(x, y);
+        } else if (mines[x][y] === 9) {
+          el.classList.add('pressed');
+          el.classList.add('mine');
+          gameState = 2;
+          clearInterval(timer);
+          showAllMines();
+        } else {
+          el.classList.add('pressed');
+          el.textContent = mines[x][y];
+          el.style.color = colors[mines[x][y]];
+          if (checkVictory()) {
+            gameState = 2;
+            showAllMines();
           }
         }
-        return;
-      }
-      if (mines[x][y] === 0) {
-        showSpace(x, y);
-      } else if (mines[x][y] === 9) {
-        el.classList.add('pressed');
-        el.classList.add('mine');
-        gameState = 2;
-        showAllMines();
-      } else {
-        el.classList.add('pressed');
-        el.textContent = mines[x][y];
-        el.style.color = colors[mines[x][y]];
+      } else if (evt.button === 2) {
+        if (el.classList.contains('pressed')) return;
+        el.classList.toggle('flag');
       }
     });
   });
@@ -132,6 +147,28 @@
         }
       }
     }
+  };
+
+  checkVictory = () => {
+    const fields = document.querySelectorAll('.field:not(.pressed)');
+    for (let i = 0; i < fields.length; i++) {
+      const coords = getCoordinates(fields[i]);
+      const x = coords[0];
+      const y = coords[1];
+      if (mines[x][y] !== 9) return false;
+    }
+    return true;
+  };
+
+  runTimer = () => {
+    return setInterval(() => {
+      const time = new Date().getTime() - start;
+      let elapsed = Math.floor(time / 100) / 10;
+      if (Math.round(elapsed) == elapsed) {
+        elapsed += '.0';
+      }
+      document.querySelector('#timer').textContent = elapsed;
+    }, 100);
   };
 
   init();
