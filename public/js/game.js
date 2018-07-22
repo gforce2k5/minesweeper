@@ -27,8 +27,11 @@
   let gameState = 0;
   let start;
   let timer;
+  let currentMines;
 
   init = () => {
+    currentMines = numOfMines;
+    document.querySelector('#mines').textContent = currentMines;
     document.querySelector('#timer').textContent = '0.0';
     document.querySelector('#message').textContent = '';
     gameState = 0;
@@ -114,6 +117,12 @@
         if (el.classList.contains('pressed')) return;
         el.classList.toggle('flag');
         flags[x][y] = el.classList.contains('flag');
+        if (flags[x][y]) {
+          currentMines--;
+        } else {
+          currentMines++;
+        }
+        document.querySelector('#mines').textContent = currentMines;
       }
     });
   });
