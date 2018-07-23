@@ -184,6 +184,7 @@
         }
         if (flags[i][j] && mines[i][j] !== 9) {
           tileSelector(i, j).innerHTML = '<i class="fas fa-times"></i>';
+          tileSelector(i, j).style.color = '#000';
         }
       }
     }
