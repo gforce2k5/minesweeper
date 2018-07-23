@@ -100,7 +100,7 @@
           gameState = 2;
           clearInterval(timer);
           showAllMines();
-          showMessage('You Lost! Pleaae try again', 'danger');
+          showMessage('You Lost! Please try again', 'danger');
         } else {
           el.classList.add('pressed');
           el.textContent = mines[x][y];
