@@ -105,14 +105,8 @@
           el.classList.add('pressed');
           el.textContent = mines[x][y];
           el.style.color = colors[mines[x][y]];
-          if (checkVictory()) {
-            gameState = 2;
-            showAllMines();
-            const elapsed = document.querySelector('#timer').textContent;
-            showMessage(`You Won! Your time is ${elapsed} seconds!`, 'success');
-            clearInterval(timer);
-          }
         }
+        checkVictory();
       } else if (evt.button === 2) {
         if (el.classList.contains('pressed')) return;
         el.classList.toggle('flag');
@@ -193,9 +187,12 @@
   checkVictory = () => {
     const fields = document.querySelectorAll('.field:not(.pressed)');
     if (fields.length === numOfMines) {
-      return true;
+      gameState = 2;
+      showAllMines();
+      const elapsed = document.querySelector('#timer').textContent;
+      showMessage(`You Won! Your time is ${elapsed} seconds!`, 'success');
+      clearInterval(timer);
     }
-    return false;
   };
 
   countFlags = (x, y) => {
