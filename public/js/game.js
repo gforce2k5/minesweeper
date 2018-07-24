@@ -33,14 +33,20 @@
     start = new Date().getTime();
     timer = runTimer();
     gameState = 1;
-    for (let i = 0; i < numOfMines; i++) {
-      const x = Math.floor(Math.random() * width);
-      const y = Math.floor(Math.random() * height);
-      if (mines[x][y] || (x === curX && y === curY)) {
-        i--;
-      } else {
-        mines[x][y] = 9;
+    const grid = [];
+    for (let i = 0; i < width; i++) {
+      for (let j = 0; j < height; j++) {
+        if (i === curX && j === curY) continue;
+        grid.push(`${i}-${j}`);
       }
+    }
+
+    for (let i = 0; i < numOfMines; i++) {
+      const index = Math.floor(Math.random() * grid.length);
+      const coords = getCoordinates(grid.splice(index, 1)[0]);
+      const x = coords[0];
+      const y = coords[1];
+      mines[x][y] = 9;
     }
 
     for (let i = 0; i < width; i++) {
