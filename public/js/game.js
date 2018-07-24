@@ -29,12 +29,10 @@
   let timer;
   let currentMines;
 
-  init = () => {
-    currentMines = numOfMines;
-    document.querySelector('#mines').textContent = currentMines;
-    document.querySelector('#timer').textContent = '0.0';
-    document.querySelector('#message').textContent = '';
-    gameState = 0;
+  init = (curX, curY) => {
+    start = new Date().getTime();
+    timer = runTimer();
+    gameState = 1;
     for (let i = 0; i < width; i++) {
       mines[i] = new Array(height);
       flags[i] = new Array(height);
@@ -43,10 +41,10 @@
     for (let i = 0; i < numOfMines; i++) {
       const x = Math.floor(Math.random() * width);
       const y = Math.floor(Math.random() * height);
-      if (!mines[x][y]) {
-        mines[x][y] = 9;
-      } else {
+      if (mines[x][y] || (x === curX && y === curY)) {
         i--;
+      } else {
+        mines[x][y] = 9;
       }
     }
 
@@ -72,16 +70,14 @@
   const fields = document.querySelectorAll('.field');
   fields.forEach((el) => {
     el.addEventListener('mousedown', (evt) => {
-      if (gameState === 0) {
-        start = new Date().getTime();
-        timer = runTimer();
-        gameState = 1;
-      } else if (gameState === 2) {
-        return;
-      }
       const coords = getCoordinates(el.id);
       const x = coords[0];
       const y = coords[1];
+      if (gameState === 0 && !(evt.button === 2)) {
+        init(x, y);
+      } else if (gameState === 2) {
+        return;
+      }
       if (evt.button === 0) {
         if (el.classList.contains('flag')) return;
         if (el.classList.contains('pressed')) {
@@ -229,14 +225,18 @@
   };
 
   newGame = () => {
+    gameState = 0;
+    currentMines = numOfMines;
+    document.querySelector('#mines').textContent = currentMines;
+    document.querySelector('#timer').textContent = '0.0';
+    document.querySelector('#message').textContent = '';
     for (let i = 0; i < width; i++) {
       for (let j = 0; j < height; j++) {
         tileSelector(i, j).classList.remove('pressed', 'mine', 'flag');
         tileSelector(i, j).textContent = '';
       }
     }
-    init();
   };
 
-  init();
+  newGame();
 }
