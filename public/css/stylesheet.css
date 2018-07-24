@@ -17,6 +17,7 @@
   height: 20px;
   background-color: #999;
   cursor: pointer;
+  font-size: 0.8em;
 }
 
 .clear-float {
@@ -28,22 +29,14 @@
   font-weight: bold;
 }
 
-.mine {
-  background-color: #000;
-}
-
 .flag {
-  background-color: #F00;
+  color: #F00;
 }
 
 #message {
   margin-top: 5em;
 }
 
-.highlight:not(.pressed):not(.flag) {
+.highlight:not(.pressed) {
   background-color: #CCC;
-}
-
-.highlight.flag {
-  background-color: #F66;
 }

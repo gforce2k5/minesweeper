@@ -87,7 +87,8 @@
           showSpace(x, y);
         } else if (mines[x][y] === 9) {
           el.classList.add('pressed');
-          el.classList.add('mine');
+          el.innerHTML = '<i class="fas fa-bomb"></i>';
+          el.style.color = '#F00';
           gameState = 2;
           clearInterval(timer);
           showAllMines();
@@ -105,18 +106,17 @@
         flags[x][y] %= 3;
         if (flags[x][y] === 1) {
           el.classList.add('flag');
+          el.innerHTML = '<i class="fab fa-font-awesome-flag"></i>';
           currentMines--;
-        } else {
+        } else if (flags[x][y] === 2) {
           el.classList.remove('flag');
-        }
-
-        if (flags[x][y] === 2) {
           el.innerHTML = '<i class="fas fa-question"></i>';
           tileSelector(x, y).style.color = '#000';
           currentMines++;
         } else {
           el.innerHTML = '';
         }
+
         document.querySelector('#mines').textContent = currentMines;
       }
     });
@@ -197,7 +197,8 @@
     for (let i = 0; i < width; i++) {
       for (let j = 0; j < height; j++) {
         if (mines[i][j] === 9 && !flags[i][j]) {
-          tileSelector(i, j).classList.add('mine');
+          tileSelector(i, j).classList.add('pressed');
+          tileSelector(i, j).innerHTML = '<i class="fas fa-bomb"></i>';
         }
         if (flags[i][j] === 1 && mines[i][j] !== 9) {
           tileSelector(i, j).innerHTML = '<i class="fas fa-times"></i>';
