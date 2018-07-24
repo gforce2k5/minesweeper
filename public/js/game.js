@@ -115,6 +115,28 @@
         document.querySelector('#mines').textContent = currentMines;
       }
     });
+
+    el.addEventListener('mouseover', () => {
+      if (gameState !== 1) return;
+      const coords = getCoordinates(el.id);
+      const x = coords[0];
+      const y = coords[1];
+      if (mines[x][y] > 0 && mines[x][y] < 9 &&
+          el.classList.contains('pressed')) {
+        highlightAdjacent(x, y, true);
+      }
+    });
+
+    el.addEventListener('mouseout', () => {
+      if (gameState !== 1) return;
+      const coords = getCoordinates(el.id);
+      const x = coords[0];
+      const y = coords[1];
+      if (mines[x][y] > 0 && mines[x][y] < 9 &&
+          el.classList.contains('pressed')) {
+        highlightAdjacent(x, y);
+      }
+    });
   });
 
   getCoordinates = (id) => {
@@ -175,6 +197,21 @@
         if (flags[i][j] && mines[i][j] !== 9) {
           tileSelector(i, j).innerHTML = '<i class="fas fa-times"></i>';
           tileSelector(i, j).style.color = '#000';
+        }
+      }
+    }
+  };
+
+  highlightAdjacent = (x, y, add) => {
+    for (let i = x - 1; i <= x + 1; i++) {
+      if (!mines[i]) continue;
+      for (let j = y - 1; j <= y + 1; j++) {
+        if (mines[i][j] >= 0) {
+          if (add) {
+            tileSelector(i, j).classList.add('highlight');
+          } else {
+            tileSelector(i, j).classList.remove('highlight');
+          }
         }
       }
     }

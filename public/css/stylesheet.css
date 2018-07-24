@@ -39,3 +39,11 @@
 #message {
   margin-top: 5em;
 }
+
+.highlight:not(.pressed):not(.flag) {
+  background-color: #CCC;
+}
+
+.highlight.flag {
+  background-color: #F66;
+}
