@@ -33,11 +33,6 @@
     start = new Date().getTime();
     timer = runTimer();
     gameState = 1;
-    for (let i = 0; i < width; i++) {
-      mines[i] = new Array(height);
-      flags[i] = new Array(height);
-    }
-
     for (let i = 0; i < numOfMines; i++) {
       const x = Math.floor(Math.random() * width);
       const y = Math.floor(Math.random() * height);
@@ -79,7 +74,7 @@
         return;
       }
       if (evt.button === 0) {
-        if (el.classList.contains('flag')) return;
+        if (flags[x][y] === 1) return;
         if (el.classList.contains('pressed')) {
           if (mines[x][y] > 0 && mines[x][y] < 9) {
             if (countFlags(x, y) === mines[x][y]) {
@@ -105,12 +100,22 @@
         checkVictory();
       } else if (evt.button === 2) {
         if (el.classList.contains('pressed')) return;
-        el.classList.toggle('flag');
-        flags[x][y] = el.classList.contains('flag');
-        if (flags[x][y]) {
+        if (!flags[x][y]) flags[x][y] = 0;
+        flags[x][y]++;
+        flags[x][y] %= 3;
+        if (flags[x][y] === 1) {
+          el.classList.add('flag');
           currentMines--;
         } else {
+          el.classList.remove('flag');
+        }
+
+        if (flags[x][y] === 2) {
+          el.innerHTML = '<i class="fas fa-question"></i>';
+          tileSelector(x, y).style.color = '#000';
           currentMines++;
+        } else {
+          el.innerHTML = '';
         }
         document.querySelector('#mines').textContent = currentMines;
       }
@@ -194,7 +199,7 @@
         if (mines[i][j] === 9 && !flags[i][j]) {
           tileSelector(i, j).classList.add('mine');
         }
-        if (flags[i][j] && mines[i][j] !== 9) {
+        if (flags[i][j] === 1 && mines[i][j] !== 9) {
           tileSelector(i, j).innerHTML = '<i class="fas fa-times"></i>';
           tileSelector(i, j).style.color = '#000';
         }
@@ -233,7 +238,7 @@
     for (let i = x - 1; i <= x + 1; i++) {
       if (!flags[i]) continue;
       for (let j = y - 1; j <= y + 1; j++) {
-        if (flags[i][j]) {
+        if (flags[i][j] === 1) {
           numOfFlags++;
         }
       }
@@ -272,6 +277,8 @@
         tileSelector(i, j).classList.remove('pressed', 'mine', 'flag');
         tileSelector(i, j).textContent = '';
       }
+      mines[i] = new Array(height);
+      flags[i] = new Array(height);
     }
   };
 
