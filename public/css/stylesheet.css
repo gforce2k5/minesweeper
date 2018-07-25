@@ -29,7 +29,7 @@
   font-weight: bold;
 }
 
-.flag {
+.flag, .active-mine {
   color: #F00;
 }
 
@@ -39,4 +39,40 @@
 
 .highlight:not(.pressed) {
   background-color: #CCC;
+}
+
+.num0 {
+  color: #FFF;
+}
+
+.num1 {
+  color: #0224E8;
+}
+
+.num2 {
+  color: #417B34;
+}
+
+.num3 {
+  color: #EB3635;
+}
+
+.num4 {
+  color: #01007B;
+}
+
+.num5 {
+  color: #76150E;
+}
+
+.num6 {
+  color: #377E80;
+}
+
+.num7 {
+  color: #000;
+}
+
+.num8 {
+  color: #808080;
 }

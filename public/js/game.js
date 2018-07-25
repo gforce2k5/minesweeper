@@ -12,17 +12,6 @@
 
   const mines = new Array(width);
   const flags = new Array(width);
-  const colors = [
-    '#FFF',
-    '#0224E8',
-    '#417B34',
-    '#E83635',
-    '#01007B',
-    '#76150E',
-    '#377E80',
-    '#000',
-    '#808080',
-  ];
 
   let gameState = 0;
   let start;
@@ -94,7 +83,7 @@
         } else if (mines[x][y] === 9) {
           el.classList.add('pressed');
           el.innerHTML = '<i class="fas fa-bomb"></i>';
-          el.style.color = '#F00';
+          el.classList.add('active-mine');
           gameState = 2;
           clearInterval(timer);
           showAllMines();
@@ -102,7 +91,7 @@
         } else {
           el.classList.add('pressed');
           el.textContent = mines[x][y];
-          el.style.color = colors[mines[x][y]];
+          el.classList.add(`num${mines[x][y]}`);
         }
         checkVictory();
       } else if (evt.button === 2) {
@@ -117,7 +106,6 @@
         } else if (flags[x][y] === 2) {
           el.classList.remove('flag');
           el.innerHTML = '<i class="fas fa-question"></i>';
-          tileSelector(x, y).style.color = '#000';
           currentMines++;
         } else {
           el.innerHTML = '';
@@ -160,7 +148,7 @@
     if (mines[x][y] > 0 && mines[x][y] < 9) {
       tile.textContent = mines[x][y];
     }
-    tile.style.color = colors[mines[x][y]];
+    tile.classList.add(`num${mines[x][y]}`);
     tile.classList.add('pressed');
   };
 
@@ -172,6 +160,7 @@
     if (numberPressed && mines[x][y] === 9 && !flags[x][y]) {
       gameState = 2;
       clearInterval(timer);
+      tileSelector(x, y).classList.add('active-mine');
       showAllMines();
       showMessage('You Lost! Pleaae try again', 'danger');
       return;
@@ -281,7 +270,9 @@
     document.querySelector('#message').textContent = '';
     for (let i = 0; i < width; i++) {
       for (let j = 0; j < height; j++) {
-        tileSelector(i, j).classList.remove('pressed', 'mine', 'flag');
+        tileSelector(i, j).classList.remove('pressed', 'mine', 'flag', 'num1',
+            'num2', 'num3', 'num4', 'num5', 'num6', 'num7', 'num8', 'num0',
+            'highlight', 'active-mine');
         tileSelector(i, j).textContent = '';
       }
       mines[i] = new Array(height);
