@@ -176,6 +176,7 @@
         }
       }
     }
+    checkVictory();
   };
 
   tileSelector = (x, y) => {
@@ -222,7 +223,6 @@
     const fields = document.querySelectorAll('.field:not(.pressed)');
     if (fields.length === numOfMines) {
       gameState = 2;
-      showAllMines();
       const elapsed = document.querySelector('#timer').textContent;
       showMessage(`You Won! Your time is ${elapsed} seconds!`, 'success');
       clearInterval(timer);
