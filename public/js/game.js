@@ -92,6 +92,7 @@
           el.classList.add('pressed');
           el.textContent = mines[x][y];
           el.classList.add(`num${mines[x][y]}`);
+          checkVictory();
         }
       } else if (evt.button === 2) {
         if (el.classList.contains('pressed')) return;
