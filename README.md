@@ -7,6 +7,6 @@ a minesweeper game
 
 ## Installation:
 1. fork the repository
-2. clone the repo `git clone https://github.com/<username>/minesweeper.git
+2. clone the repo `git clone https://github.com/**username**/minesweeper.git
 3. run `npm install`
 3. run `npm start`
