@@ -4,10 +4,13 @@
   <h2>Your time is <span id="timer">0.0</span></h2>
   <% if (game) { %>
     <h3>You have <span id="mines"><%= game.mines %></span> mines left.</h3>
-    <div class="board" style="width: <%= 20 * game.width + 2 %>px">
+    <div class="board" style="width: <%= 20 * game.width + 1 %>px">
       <% for (let i = 0; i < game.height; i++) { %>
         <% for (let j = 0; j < game.width; j++) { %>
-          <div class="field float-left" id="<%= j %>-<%= i %>"></div>
+          <% let classes = '' %>
+          <% if (i === game.height - 1) classes += ' bottom' %>
+          <% if (j === game.width - 1) classes += ' right' %>
+          <div class="field float-left<%= classes %>" id="<%= j %>-<%= i %>"></div>
         <% } %>
         <div class="clear-float"></div>
       <% } %>

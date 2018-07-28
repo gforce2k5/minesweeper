@@ -20,6 +20,14 @@
   font-size: 0.8em;
 }
 
+.right {
+  border-right: 1px solid black;
+}
+
+.bottom {
+  border-bottom: 1px solid black;
+}
+
 .clear-float {
   clear: both;
 }
