@@ -220,6 +220,12 @@
   checkVictory = () => {
     const fields = document.querySelectorAll('.field:not(.pressed)');
     if (fields.length === numOfMines) {
+      fields.forEach((el) => {
+        el.classList.add('flag');
+        el.classList.remove('highlight');
+        el.innerHTML = '<i class="fab fa-font-awesome-flag"></i>';
+        document.querySelector('#mines').textContent = 0;
+      });
       gameState = 2;
       const elapsed = document.querySelector('#timer').textContent;
       showMessage(`You Won! Your time is ${elapsed} seconds!`, 'success');
