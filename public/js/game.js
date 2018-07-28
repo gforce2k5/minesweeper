@@ -93,7 +93,6 @@
           el.textContent = mines[x][y];
           el.classList.add(`num${mines[x][y]}`);
         }
-        checkVictory();
       } else if (evt.button === 2) {
         if (el.classList.contains('pressed')) return;
         if (!flags[x][y]) flags[x][y] = 0;
@@ -195,8 +194,7 @@
         if (mines[i][j] === 9 && !flags[i][j]) {
           tileSelector(i, j).classList.add('pressed');
           tileSelector(i, j).innerHTML = '<i class="fas fa-bomb"></i>';
-        }
-        if (flags[i][j] === 1 && mines[i][j] !== 9) {
+        } else if (flags[i][j] === 1 && mines[i][j] !== 9) {
           tileSelector(i, j).innerHTML = '<i class="fas fa-times"></i>';
           tileSelector(i, j).style.color = '#000';
         }
