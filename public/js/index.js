@@ -10,7 +10,7 @@ difficulty.addEventListener('change', () => {
       setFields(16, 16, 40);
       break;
     case 'hard':
-      setFields(31, 16, 99);
+      setFields(30, 16, 99);
       break;
   }
 });
