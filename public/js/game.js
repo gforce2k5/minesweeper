@@ -89,9 +89,7 @@
           showAllMines();
           showMessage('You Lost! Please try again', 'danger');
         } else {
-          el.classList.add('pressed');
-          el.textContent = mines[x][y];
-          el.classList.add(`num${mines[x][y]}`);
+          revealNumber(x, y);
           checkVictory();
         }
       } else if (evt.button === 2) {
@@ -197,7 +195,7 @@
           tileSelector(i, j).innerHTML = '<i class="fas fa-bomb"></i>';
         } else if (flags[i][j] === 1 && mines[i][j] !== 9) {
           tileSelector(i, j).innerHTML = '<i class="fas fa-times"></i>';
-          tileSelector(i, j).style.color = '#000';
+          tileSelector(i, j).classList.remove('flag');
         }
       }
     }
