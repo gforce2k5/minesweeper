@@ -19,6 +19,13 @@
   let currentMines;
 
   init = (curX, curY) => {
+    fetch('/game/new/', {
+      method: 'POST',
+    }).then((response) => {
+      return response.json();
+    }).then((data) => {
+      console.log(data);
+    });
     start = new Date().getTime();
     timer = runTimer();
     gameState = 1;

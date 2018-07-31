@@ -3,6 +3,7 @@ const express = require('express');
 const app = express();
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
+const Game = require('./models/game');
 
 mongoose.connect(process.env.DATABASEURL);
 
@@ -23,7 +24,28 @@ app.get('/game', (req, res) => {
       req.query.mines >= req.query.width * req.query.height) {
     return res.redirect('/');
   }
-  res.render('game', {game: req.query});
+  let difficulty;
+  if (req.query.width === '9' && req.query.height === '9' &&
+      req.query.mines === '10') {
+    difficulty = 'easy';
+  } else if (req.query.width === '16' && req.query.height === '16' &&
+      req.query.mines === '40') {
+    difficulty = 'medium';
+  } else if (req.query.width === '30' && req.query.height === '16' &&
+      req.query.mines === '99') {
+    difficulty = 'hard';
+  }
+  if (difficulty) {
+    Game.create({difficulty: difficulty})
+    .then((newGame) => {
+      res.render('game', {game: req.query, id: newGame.id});
+    });
+  }
+});
+
+app.post('/game/new', (req, res) => {
+  // Game.create()
+  res.send('{"title": "hello"}');
 });
 
 app.listen(process.env.PORT, () => {
