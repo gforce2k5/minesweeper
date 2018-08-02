@@ -19,7 +19,7 @@
   let currentMines;
 
   init = (curX, curY) => {
-    fetch('/game/new/', {
+    fetch(`/game/new/${gameId}`, {
       method: 'POST',
     }).then((response) => {
       return response.json();

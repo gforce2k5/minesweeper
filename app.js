@@ -5,7 +5,7 @@ const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
 const Game = require('./models/game');
 
-mongoose.connect(process.env.DATABASEURL);
+mongoose.connect(process.env.DATABASEURL, {useNewUrlParser: true});
 
 app.set('view engine', 'ejs');
 app.use(bodyParser.urlencoded({extended: true}));
@@ -36,16 +36,24 @@ app.get('/game', (req, res) => {
     difficulty = 'hard';
   }
   if (difficulty) {
-    Game.create({difficulty: difficulty})
+    Game.create({difficulty: difficulty, ip: req.ip})
     .then((newGame) => {
       res.render('game', {game: req.query, id: newGame.id});
-    });
+    })
+    .catch();
   }
 });
 
-app.post('/game/new', (req, res) => {
-  // Game.create()
-  res.send('{"title": "hello"}');
+app.post('/game/new/:id', (req, res) => {
+  Game.findById(req.params.id)
+  .then((foundGame) => {
+    if (foundGame.ip === req.ip && !foundGame.started) {
+      foundGame.start = new Date();
+      foundGame.started = true;
+      foundGame.save();
+    }
+  })
+  .catch();
 });
 
 app.listen(process.env.PORT, () => {
