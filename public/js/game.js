@@ -19,13 +19,6 @@
   let currentMines;
 
   init = (curX, curY) => {
-    fetch(`/game/new/${gameId}`, {
-      method: 'POST',
-    }).then((response) => {
-      return response.json();
-    }).then((data) => {
-      console.log(data);
-    });
     start = new Date().getTime();
     timer = runTimer();
     gameState = 1;
@@ -62,6 +55,16 @@
         mines[i][j] = surroundingMines;
       }
     }
+    const data = new FormData();
+    data.append('json', JSON.stringify({board: mines}));
+    fetch(`/game/new/${gameId}`, {
+      method: 'POST',
+      body: data,
+    }).then((response) => {
+      return response.json();
+    }).then((data) => {
+      console.log(data);
+    });
   };
 
   const fields = document.querySelectorAll('.field');

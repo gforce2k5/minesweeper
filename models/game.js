@@ -5,6 +5,7 @@ const gameSchema = new mongoose.Schema({
   state: {type: Number, default: 0},
   difficulty: String,
   ip: String,
+  board: [[Number]],
 });
 
 module.exports = mongoose.model('Game', gameSchema);

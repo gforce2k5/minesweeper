@@ -45,12 +45,14 @@ app.get('/game', (req, res) => {
 });
 
 app.post('/game/new/:id', (req, res) => {
+  console.log(req);
   Game.findById(req.params.id)
   .then((foundGame) => {
     if (foundGame.ip === req.ip) {
       if (!foundGame.state) {
         foundGame.start = new Date();
         foundGame.state = 1;
+        foundGame.board = req.body.board;
         foundGame.save();
       }
     }
