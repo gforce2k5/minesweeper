@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 
 const gameSchema = new mongoose.Schema({
   start: {type: Date, default: Date.now},
-  started: {type: Boolean, default: false},
+  state: {type: Number, default: 0},
   difficulty: String,
   ip: String,
 });

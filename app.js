@@ -47,10 +47,22 @@ app.get('/game', (req, res) => {
 app.post('/game/new/:id', (req, res) => {
   Game.findById(req.params.id)
   .then((foundGame) => {
-    if (foundGame.ip === req.ip && !foundGame.started) {
-      foundGame.start = new Date();
-      foundGame.started = true;
-      foundGame.save();
+    if (foundGame.ip === req.ip) {
+      if (!foundGame.state) {
+        foundGame.start = new Date();
+        foundGame.state = 1;
+        foundGame.save();
+      }
+    }
+  })
+  .catch();
+});
+
+app.post('/game/score/:id', (req, res) => {
+  Game.findById(req.params.id)
+  .then((foundGame) => {
+    if (foundGame.ip === req.ip && foundGame.state === 2) {
+      // TODO
     }
   })
   .catch();
