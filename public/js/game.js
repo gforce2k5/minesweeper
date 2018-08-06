@@ -10,7 +10,7 @@
     }
   });
 
-  const mines = new Array(width);
+  let mines = new Array(width);
   const flags = new Array(width);
 
   let gameState = 0;
@@ -22,49 +22,48 @@
     start = new Date().getTime();
     timer = runTimer();
     gameState = 1;
-    const grid = [];
-    for (let i = 0; i < width; i++) {
-      for (let j = 0; j < height; j++) {
-        if (i === curX && j === curY) continue;
-        grid.push(`${i}-${j}`);
-      }
-    }
-
-    for (let i = 0; i < numOfMines; i++) {
-      const index = Math.floor(Math.random() * grid.length);
-      const coords = getCoordinates(grid.splice(index, 1)[0]);
-      const x = coords[0];
-      const y = coords[1];
-      mines[x][y] = 9;
-    }
-
-    for (let i = 0; i < width; i++) {
-      for (let j = 0; j < height; j++) {
-        if (mines[i][j] === 9) {
-          continue;
+    if (gameId) {
+      return postData(`/game/new/${gameId}`, {
+        x: curX,
+        y: curY,
+      }, (data) => {
+        mines = data;
+      });
+    } else {
+      const grid = [];
+      for (let i = 0; i < width; i++) {
+        for (let j = 0; j < height; j++) {
+          if (i === curX && j === curY) continue;
+          grid.push(`${i}-${j}`);
         }
-        let surroundingMines = 0;
-        for (let ii = i - 1; ii <= i + 1; ii++) {
-          if (!mines[ii]) continue;
-          for (let jj = j - 1; jj <= j + 1; jj++) {
-            if (mines[ii][jj] && mines[ii][jj] === 9) {
-              surroundingMines++;
+      }
+
+      for (let i = 0; i < numOfMines; i++) {
+        const index = Math.floor(Math.random() * grid.length);
+        const coords = getCoordinates(grid.splice(index, 1)[0]);
+        const x = coords[0];
+        const y = coords[1];
+        mines[x][y] = 9;
+      }
+
+      for (let i = 0; i < width; i++) {
+        for (let j = 0; j < height; j++) {
+          if (mines[i][j] === 9) {
+            continue;
+          }
+          let surroundingMines = 0;
+          for (let ii = i - 1; ii <= i + 1; ii++) {
+            if (!mines[ii]) continue;
+            for (let jj = j - 1; jj <= j + 1; jj++) {
+              if (mines[ii][jj] && mines[ii][jj] === 9) {
+                surroundingMines++;
+              }
             }
           }
+          mines[i][j] = surroundingMines;
         }
-        mines[i][j] = surroundingMines;
       }
     }
-    const data = new FormData();
-    data.append('json', JSON.stringify({board: mines}));
-    fetch(`/game/new/${gameId}`, {
-      method: 'POST',
-      body: data,
-    }).then((response) => {
-      return response.json();
-    }).then((data) => {
-      console.log(data);
-    });
   };
 
   const fields = document.querySelectorAll('.field');
@@ -74,55 +73,21 @@
       const x = coords[0];
       const y = coords[1];
       if (gameState === 0 && !(evt.button === 2)) {
-        init(x, y);
+        if (gameId) {
+          init(x, y)
+          .then(() => {
+            makeMove(evt, x, y, el);
+          })
+          .catch();
+        } else {
+          init(x, y);
+          makeMove(evt, x, y, el);
+        }
+        return;
       } else if (gameState === 2) {
         return;
       }
-      if (evt.button === 0) {
-        if (flags[x][y] === 1) return;
-        if (el.classList.contains('pressed')) {
-          if (mines[x][y] > 0 && mines[x][y] < 9) {
-            if (countFlags(x, y) === mines[x][y]) {
-              showSpace(x, y, false, true);
-            }
-          }
-          return;
-        }
-        if (mines[x][y] === 0) {
-          showSpace(x, y);
-        } else if (mines[x][y] === 9) {
-          el.classList.add('pressed');
-          el.innerHTML = '<i class="fas fa-bomb"></i>';
-          el.classList.add('active-mine');
-          gameState = 2;
-          clearInterval(timer);
-          showAllMines();
-          showMessage('You Lost! Please try again', 'danger');
-        } else {
-          el.classList.add('pressed');
-          el.textContent = mines[x][y];
-          el.classList.add(`num${mines[x][y]}`);
-          checkVictory();
-        }
-      } else if (evt.button === 2) {
-        if (el.classList.contains('pressed')) return;
-        if (!flags[x][y]) flags[x][y] = 0;
-        flags[x][y]++;
-        flags[x][y] %= 3;
-        if (flags[x][y] === 1) {
-          el.classList.add('flag');
-          el.innerHTML = '<i class="fab fa-font-awesome-flag"></i>';
-          currentMines--;
-        } else if (flags[x][y] === 2) {
-          el.classList.remove('flag');
-          el.innerHTML = '<i class="fas fa-question"></i>';
-          currentMines++;
-        } else {
-          el.innerHTML = '';
-        }
-
-        document.querySelector('#mines').textContent = currentMines;
-      }
+      makeMove(evt, x, y, el);
     });
 
     el.addEventListener('mouseover', () => {
@@ -148,6 +113,54 @@
     });
   });
 
+  makeMove = (evt, x, y, el) => {
+    if (evt.button === 0) {
+      if (flags[x][y] === 1) return;
+      if (el.classList.contains('pressed')) {
+        if (mines[x][y] > 0 && mines[x][y] < 9) {
+          if (countFlags(x, y) === mines[x][y]) {
+            showSpace(x, y, false, true);
+          }
+        }
+        return;
+      }
+      if (mines[x][y] === 0) {
+        showSpace(x, y);
+      } else if (mines[x][y] === 9) {
+        el.classList.add('pressed');
+        el.innerHTML = '<i class="fas fa-bomb"></i>';
+        el.classList.add('active-mine');
+        gameState = 2;
+        clearInterval(timer);
+        showAllMines();
+        showMessage('You Lost! Please try again', 'danger');
+      } else {
+        el.classList.add('pressed');
+        el.textContent = mines[x][y];
+        el.classList.add(`num${mines[x][y]}`);
+        checkVictory();
+      }
+    } else if (evt.button === 2) {
+      if (el.classList.contains('pressed')) return;
+      if (!flags[x][y]) flags[x][y] = 0;
+      flags[x][y]++;
+      flags[x][y] %= 3;
+      if (flags[x][y] === 1) {
+        el.classList.add('flag');
+        el.innerHTML = '<i class="fab fa-font-awesome-flag"></i>';
+        currentMines--;
+      } else if (flags[x][y] === 2) {
+        el.classList.remove('flag');
+        el.innerHTML = '<i class="fas fa-question"></i>';
+        currentMines++;
+      } else {
+        el.innerHTML = '';
+      }
+
+      document.querySelector('#mines').textContent = currentMines;
+    }
+  };
+
   getCoordinates = (id) => {
     const coords = id.split('-');
     return [parseInt(coords[0]), parseInt(coords[1])];
@@ -160,6 +173,7 @@
     }
     tile.classList.add(`num${mines[x][y]}`);
     tile.classList.add('pressed');
+    postData(`/game/update/${gameId}`, {x: x, y: y});
   };
 
   showSpace = (x, y, ignoreMines = true, numberPressed = false) => {
@@ -278,6 +292,9 @@
   };
 
   newGame = () => {
+    if (gameId && gameState === 2) {
+      location.reload();
+    }
     gameState = 0;
     currentMines = numOfMines;
     document.querySelector('#mines').textContent = currentMines;
@@ -293,6 +310,30 @@
       mines[i] = new Array(height);
       flags[i] = new Array(height);
     }
+  };
+
+  postData = (url, data, callback) => {
+    if (!gameId) return;
+    const headers = new Headers();
+    headers.append('Content-Type', 'application/json');
+    const options = {
+      method: 'POST',
+      headers: headers,
+      cache: 'default',
+      body: JSON.stringify({data}),
+    };
+    const request = new Request(url, options);
+    return fetch(request)
+    .then((res) => {
+      console.log(res);
+      return res.json();
+    })
+    .then((resData) => {
+      return callback(resData);
+    })
+    .catch((err) => {
+      console.log(err);
+    });
   };
 
   newGame();
