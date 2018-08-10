@@ -17,6 +17,7 @@
   let start;
   let timer;
   let currentMines;
+  let currentBlocks = [];
 
   init = (curX, curY) => {
     start = new Date().getTime();
@@ -122,6 +123,7 @@
             showSpace(x, y, false, true);
           }
         }
+        sendMove();
         return;
       }
       if (mines[x][y] === 0) {
@@ -135,9 +137,7 @@
         showAllMines();
         showMessage('You Lost! Please try again', 'danger');
       } else {
-        el.classList.add('pressed');
-        el.textContent = mines[x][y];
-        el.classList.add(`num${mines[x][y]}`);
+        revealNumber(x, y);
         checkVictory();
       }
     } else if (evt.button === 2) {
@@ -159,6 +159,7 @@
 
       document.querySelector('#mines').textContent = currentMines;
     }
+    sendMove();
   };
 
   getCoordinates = (id) => {
@@ -167,13 +168,18 @@
   };
 
   revealNumber = (x, y) => {
+    if (gameId && !tileSelector(x, y).classList.contains('pressed')) {
+      currentBlocks.push({
+        x: x,
+        y: y,
+      });
+    }
     const tile = tileSelector(x, y);
     if (mines[x][y] > 0 && mines[x][y] < 9) {
       tile.textContent = mines[x][y];
     }
     tile.classList.add(`num${mines[x][y]}`);
     tile.classList.add('pressed');
-    postData(`/game/update/${gameId}`, {x: x, y: y});
   };
 
   showSpace = (x, y, ignoreMines = true, numberPressed = false) => {
@@ -225,6 +231,9 @@
         }
       }
     }
+    if (gameId) {
+      postData(`/game/mine/${gameId}`);
+    }
   };
 
   highlightAdjacent = (x, y, add) => {
@@ -253,9 +262,27 @@
       });
       gameState = 2;
       const elapsed = document.querySelector('#timer').textContent;
-      showMessage(`You Won! Your time is ${elapsed} seconds!`, 'success');
       clearInterval(timer);
+      if (gameId) {
+        if (currentBlocks.length > 0) {
+          sendMove(() => {
+            sendFinishedGame(elapsed);
+          });
+        } else {
+          sendFinishedGame(elapsed);
+        }
+      } else {
+        showMessage(`You Won! Your time is ${elapsed} seconds!`, 'success');
+      }
     }
+  };
+
+  sendFinishedGame = (elapsed) => {
+    postData(`/game/score/${gameId}`, {}, (data) => {
+      console.log(data, elapsed);
+      showMessage(`You Won! Your time is ${elapsed} seconds!`,
+        'success', data.scoreId);
+    });
   };
 
   countFlags = (x, y) => {
@@ -282,11 +309,26 @@
     }, 100);
   };
 
-  showMessage = (msg, alertType) => {
+  showMessage = (msg, alertType, scoreId) => {
+    let form = '';
+    if (alertType === 'success' && gameId) {
+      /* eslint-disable max-len */
+      form = `
+        <form action="/score/${scoreId}" method="POST">
+          <div class="form-group">
+            <label for="name">Name</label>
+            <input class="form-control" type="text" name="name" id="name" required>
+          </div>
+          <input type="submit" value="Submit" class="btn btn-success">
+        </form>
+      `;
+      /* eslint-enable max-len */
+    }
     document.querySelector('#message').innerHTML = `
       <div class="alert alert-${alertType}">
         <p>${msg}</p>
         <button id="new-game" class="btn btn-${alertType}">New Game</button>
+        ${form}
       </div>
     `;
   };
@@ -325,15 +367,26 @@
     const request = new Request(url, options);
     return fetch(request)
     .then((res) => {
-      console.log(res);
       return res.json();
     })
     .then((resData) => {
-      return callback(resData);
+      console.log(resData);
+      if (callback) {
+        return callback(resData);
+      }
     })
     .catch((err) => {
       console.log(err);
     });
+  };
+
+  sendMove = (callback) => {
+    if (gameId && currentBlocks.length > 0) {
+      postData(`/game/update/${gameId}`, {
+        blocks: currentBlocks,
+      }, callback);
+      currentBlocks = [];
+    }
   };
 
   newGame();

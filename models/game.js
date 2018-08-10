@@ -7,6 +7,8 @@ const gameSchema = new mongoose.Schema({
   ip: String,
   board: [[Number]],
   boardState: [[Boolean]],
+  score: Number,
+  name: String,
 });
 
 module.exports = mongoose.model('Game', gameSchema);

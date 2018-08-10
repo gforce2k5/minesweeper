@@ -4,6 +4,7 @@ const app = express();
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
 const Game = require('./models/game');
+const Score = require('./models/score');
 
 mongoose.connect(process.env.DATABASEURL, {useNewUrlParser: true});
 
@@ -12,7 +13,23 @@ app.use(bodyParser.json());
 app.use(express.static(`${__dirname}/public`));
 
 app.get('/', (req, res) => {
-  res.render('index');
+  const results = {};
+  Game.find({difficulty: 'easy', state: 2})
+  .select('name score').sort('score').limit(10).exec()
+  .then((foundGames) => {
+    results.easy = foundGames;
+    return Game.find({difficulty: 'mediun', state: 2})
+    .select('name score').sort('score').limit(10).exec();
+  })
+  .then((foundGames) => {
+    results.medium = foundGames;
+    return Game.find({difficulty: 'hard', state: 2})
+    .select('name score').sort('score').limit(10).exec();
+  })
+  .then((foundGames) => {
+    results.hard = foundGames;
+    res.render('index', {results: results});
+  });
 });
 
 app.get('/game', (req, res) => {
@@ -145,15 +162,32 @@ app.post('/game/new/:id', (req, res) => {
   });
 });
 
-app.post('/game/continue/:id', (req, res) => {
-
-});
-
 app.post('/game/score/:id', (req, res) => {
   Game.findById(req.params.id)
   .then((foundGame) => {
     if (foundGame.ip === req.ip && foundGame.state === 1) {
-      // TODO
+      let = flag = false;
+      for (let i = 0; i < foundGame.boardState.length; i++) {
+        for (let j = 0; j < foundGame.boardState[i].length; j++) {
+          if (!foundGame.boardState[i][j]) {
+            if (foundGame.board[i][j] != 9) {
+              flag = true;
+              break;
+            }
+          }
+        }
+      }
+      if (!flag) {
+        Score.create({
+          score: Math.round((Date.now() - foundGame.start) / 1000),
+          gameId: foundGame._id,
+        })
+        .then((score) => {
+          res.send(JSON.stringify({scoreId: score._id}));
+        });
+        foundGame.state = 2;
+        foundGame.save();
+      }
     }
   })
   .catch((err) => {
@@ -162,23 +196,59 @@ app.post('/game/score/:id', (req, res) => {
 });
 
 app.post('/game/update/:id', (req, res) => {
-  console.log(req.body);
   Game.findById(req.params.id)
   .then((foundGame) => {
-    if (foundGame.ip === req.ip && foundGame === 1) {
+    if (foundGame.ip === req.ip && foundGame.state === 1) {
       const bState = foundGame.boardState;
-      if (foundGame.board[req.body.x][req.body.y] !== 9) {
-        bState[req.body.x][req.body.y] = true;
-      } else {
-        foundGame.state = 3;
-        return foundGame.save();
+      const blocks = req.body.data.blocks;
+      for (let i = 0; i < blocks.length; i++) {
+        if (foundGame.board[blocks[i].x][blocks[i].y] !== 9) {
+          bState[blocks[i].x][blocks[i].y] = true;
+        } else {
+          foundGame.state = 3;
+          return foundGame.save();
+        }
       }
       return foundGame.update({$set: {
         boardState: bState,
       }});
     }
   })
-  .catch((err) => console.log(err));
+  .then(() => {
+    res.send(JSON.stringify({status: 'ok'}));
+  })
+  .catch((err) => {
+    res.send(JSON.stringify({status: 'error'}));
+    console.log(err);
+  });
+});
+
+app.post('/game/mine/:id', (req, res) => {
+  Game.findById(req.params.id)
+  .then((foundGame) => {
+    if (foundGame.ip === req.ip) {
+      foundGame.state = 3;
+      return foundGame.save();
+    }
+  })
+  .catch((err) => {
+    console.log(error);
+  });
+});
+
+app.post('/score/:id', bodyParser.urlencoded({extended: true}), (req, res) => {
+  console.log(req.body);
+  Score.findByIdAndRemove(req.params.id)
+  .then((foundScore) => {
+    return Game.findByIdAndUpdate(foundScore.gameId, {
+      score: foundScore.score,
+      name: req.body.name,
+    });
+  })
+  .catch((err) => {
+    console.log(err);
+  });
+  res.redirect('/');
 });
 
 app.listen(process.env.PORT, () => {

@@ -84,3 +84,7 @@
 .num8 {
   color: #808080;
 }
+
+.card-body > h5 {
+  text-transform: capitalize;
+}
