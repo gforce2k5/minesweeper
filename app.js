@@ -185,8 +185,6 @@ app.post('/game/score/:id', (req, res) => {
         .then((score) => {
           res.send(JSON.stringify({scoreId: score._id}));
         });
-        foundGame.state = 2;
-        foundGame.save();
       }
     }
   })
@@ -242,6 +240,7 @@ app.post('/score/:id', bodyParser.urlencoded({extended: true}), (req, res) => {
     return Game.findByIdAndUpdate(foundScore.gameId, {
       score: foundScore.score,
       name: req.body.name,
+      state: 2,
     });
   })
   .catch((err) => {
