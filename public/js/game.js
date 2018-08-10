@@ -21,7 +21,6 @@
 
   init = (curX, curY) => {
     start = new Date().getTime();
-    timer = runTimer();
     gameState = 1;
     if (gameId) {
       return postData(`/game/new/${gameId}`, {
@@ -29,8 +28,10 @@
         y: curY,
       }, (data) => {
         mines = data;
+        timer = runTimer();
       });
     } else {
+      timer = runTimer();
       const grid = [];
       for (let i = 0; i < width; i++) {
         for (let j = 0; j < height; j++) {
