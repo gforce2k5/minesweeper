@@ -74,56 +74,12 @@
       const x = coords[0];
       const y = coords[1];
       if (gameState === 0 && !(evt.button === 2)) {
-<<<<<<< HEAD
-        init(x, y);
-      } else if (gameState === 2) {
-        return;
-      }
-      if (evt.button === 0) {
-        if (flags[x][y] === 1) return;
-        if (el.classList.contains('pressed')) {
-          if (mines[x][y] > 0 && mines[x][y] < 9) {
-            if (countFlags(x, y) === mines[x][y]) {
-              showSpace(x, y, false, true);
-            }
-          }
-          return;
-        }
-        if (mines[x][y] === 0) {
-          showSpace(x, y);
-        } else if (mines[x][y] === 9) {
-          el.classList.add('pressed');
-          el.innerHTML = '<i class="fas fa-bomb"></i>';
-          el.classList.add('active-mine');
-          gameState = 2;
-          clearInterval(timer);
-          showAllMines();
-          showMessage('You Lost! Please try again', 'danger');
-        } else {
-          revealNumber(x, y);
-          checkVictory();
-        }
-      } else if (evt.button === 2) {
-        if (el.classList.contains('pressed')) return;
-        if (!flags[x][y]) flags[x][y] = 0;
-        flags[x][y]++;
-        flags[x][y] %= 3;
-        if (flags[x][y] === 1) {
-          el.classList.add('flag');
-          el.innerHTML = '<i class="fab fa-font-awesome-flag"></i>';
-          currentMines--;
-        } else if (flags[x][y] === 2) {
-          el.classList.remove('flag');
-          el.innerHTML = '<i class="fas fa-question"></i>';
-          currentMines++;
-=======
         if (gameId) {
           init(x, y)
           .then(() => {
             makeMove(evt, x, y, el);
           })
           .catch();
->>>>>>> feat/highscore
         } else {
           init(x, y);
           makeMove(evt, x, y, el);
@@ -414,7 +370,6 @@
       return res.json();
     })
     .then((resData) => {
-      console.log(resData);
       if (callback) {
         return callback(resData);
       }

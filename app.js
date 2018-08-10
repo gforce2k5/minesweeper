@@ -232,12 +232,11 @@ app.post('/game/mine/:id', (req, res) => {
     }
   })
   .catch((err) => {
-    console.log(error);
+    console.log(err);
   });
 });
 
 app.post('/score/:id', bodyParser.urlencoded({extended: true}), (req, res) => {
-  console.log(req.body);
   Score.findByIdAndRemove(req.params.id)
   .then((foundScore) => {
     return Game.findByIdAndUpdate(foundScore.gameId, {
