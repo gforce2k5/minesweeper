@@ -10,49 +10,59 @@
     }
   });
 
-  const mines = new Array(width);
+  let mines = new Array(width);
   const flags = new Array(width);
 
   let gameState = 0;
   let start;
   let timer;
   let currentMines;
+  let currentBlocks = [];
 
   init = (curX, curY) => {
     start = new Date().getTime();
     timer = runTimer();
     gameState = 1;
-    const grid = [];
-    for (let i = 0; i < width; i++) {
-      for (let j = 0; j < height; j++) {
-        if (i === curX && j === curY) continue;
-        grid.push(`${i}-${j}`);
-      }
-    }
-
-    for (let i = 0; i < numOfMines; i++) {
-      const index = Math.floor(Math.random() * grid.length);
-      const coords = getCoordinates(grid.splice(index, 1)[0]);
-      const x = coords[0];
-      const y = coords[1];
-      mines[x][y] = 9;
-    }
-
-    for (let i = 0; i < width; i++) {
-      for (let j = 0; j < height; j++) {
-        if (mines[i][j] === 9) {
-          continue;
+    if (gameId) {
+      return postData(`/game/new/${gameId}`, {
+        x: curX,
+        y: curY,
+      }, (data) => {
+        mines = data;
+      });
+    } else {
+      const grid = [];
+      for (let i = 0; i < width; i++) {
+        for (let j = 0; j < height; j++) {
+          if (i === curX && j === curY) continue;
+          grid.push(`${i}-${j}`);
         }
-        let surroundingMines = 0;
-        for (let ii = i - 1; ii <= i + 1; ii++) {
-          if (!mines[ii]) continue;
-          for (let jj = j - 1; jj <= j + 1; jj++) {
-            if (mines[ii][jj] && mines[ii][jj] === 9) {
-              surroundingMines++;
+      }
+
+      for (let i = 0; i < numOfMines; i++) {
+        const index = Math.floor(Math.random() * grid.length);
+        const coords = getCoordinates(grid.splice(index, 1)[0]);
+        const x = coords[0];
+        const y = coords[1];
+        mines[x][y] = 9;
+      }
+
+      for (let i = 0; i < width; i++) {
+        for (let j = 0; j < height; j++) {
+          if (mines[i][j] === 9) {
+            continue;
+          }
+          let surroundingMines = 0;
+          for (let ii = i - 1; ii <= i + 1; ii++) {
+            if (!mines[ii]) continue;
+            for (let jj = j - 1; jj <= j + 1; jj++) {
+              if (mines[ii][jj] && mines[ii][jj] === 9) {
+                surroundingMines++;
+              }
             }
           }
+          mines[i][j] = surroundingMines;
         }
-        mines[i][j] = surroundingMines;
       }
     }
   };
@@ -64,6 +74,7 @@
       const x = coords[0];
       const y = coords[1];
       if (gameState === 0 && !(evt.button === 2)) {
+<<<<<<< HEAD
         init(x, y);
       } else if (gameState === 2) {
         return;
@@ -105,12 +116,23 @@
           el.classList.remove('flag');
           el.innerHTML = '<i class="fas fa-question"></i>';
           currentMines++;
+=======
+        if (gameId) {
+          init(x, y)
+          .then(() => {
+            makeMove(evt, x, y, el);
+          })
+          .catch();
+>>>>>>> feat/highscore
         } else {
-          el.innerHTML = '';
+          init(x, y);
+          makeMove(evt, x, y, el);
         }
-
-        document.querySelector('#mines').textContent = currentMines;
+        return;
+      } else if (gameState === 2) {
+        return;
       }
+      makeMove(evt, x, y, el);
     });
 
     el.addEventListener('mouseover', () => {
@@ -136,12 +158,66 @@
     });
   });
 
+  makeMove = (evt, x, y, el) => {
+    if (evt.button === 0) {
+      if (flags[x][y] === 1) return;
+      if (el.classList.contains('pressed')) {
+        if (mines[x][y] > 0 && mines[x][y] < 9) {
+          if (countFlags(x, y) === mines[x][y]) {
+            showSpace(x, y, false, true);
+          }
+        }
+        sendMove();
+        return;
+      }
+      if (mines[x][y] === 0) {
+        showSpace(x, y);
+      } else if (mines[x][y] === 9) {
+        el.classList.add('pressed');
+        el.innerHTML = '<i class="fas fa-bomb"></i>';
+        el.classList.add('active-mine');
+        gameState = 2;
+        clearInterval(timer);
+        showAllMines();
+        showMessage('You Lost! Please try again', 'danger');
+      } else {
+        revealNumber(x, y);
+        checkVictory();
+      }
+    } else if (evt.button === 2) {
+      if (el.classList.contains('pressed')) return;
+      if (!flags[x][y]) flags[x][y] = 0;
+      flags[x][y]++;
+      flags[x][y] %= 3;
+      if (flags[x][y] === 1) {
+        el.classList.add('flag');
+        el.innerHTML = '<i class="fab fa-font-awesome-flag"></i>';
+        currentMines--;
+      } else if (flags[x][y] === 2) {
+        el.classList.remove('flag');
+        el.innerHTML = '<i class="fas fa-question"></i>';
+        currentMines++;
+      } else {
+        el.innerHTML = '';
+      }
+
+      document.querySelector('#mines').textContent = currentMines;
+    }
+    sendMove();
+  };
+
   getCoordinates = (id) => {
     const coords = id.split('-');
     return [parseInt(coords[0]), parseInt(coords[1])];
   };
 
   revealNumber = (x, y) => {
+    if (gameId && !tileSelector(x, y).classList.contains('pressed')) {
+      currentBlocks.push({
+        x: x,
+        y: y,
+      });
+    }
     const tile = tileSelector(x, y);
     if (mines[x][y] > 0 && mines[x][y] < 9) {
       tile.textContent = mines[x][y];
@@ -199,6 +275,9 @@
         }
       }
     }
+    if (gameId) {
+      postData(`/game/mine/${gameId}`);
+    }
   };
 
   highlightAdjacent = (x, y, add) => {
@@ -227,9 +306,27 @@
       });
       gameState = 2;
       const elapsed = document.querySelector('#timer').textContent;
-      showMessage(`You Won! Your time is ${elapsed} seconds!`, 'success');
       clearInterval(timer);
+      if (gameId) {
+        if (currentBlocks.length > 0) {
+          sendMove(() => {
+            sendFinishedGame(elapsed);
+          });
+        } else {
+          sendFinishedGame(elapsed);
+        }
+      } else {
+        showMessage(`You Won! Your time is ${elapsed} seconds!`, 'success');
+      }
     }
+  };
+
+  sendFinishedGame = (elapsed) => {
+    postData(`/game/score/${gameId}`, {}, (data) => {
+      console.log(data, elapsed);
+      showMessage(`You Won! Your time is ${elapsed} seconds!`,
+        'success', data.scoreId);
+    });
   };
 
   countFlags = (x, y) => {
@@ -256,16 +353,34 @@
     }, 100);
   };
 
-  showMessage = (msg, alertType) => {
+  showMessage = (msg, alertType, scoreId) => {
+    let form = '';
+    if (alertType === 'success' && gameId) {
+      /* eslint-disable max-len */
+      form = `
+        <form action="/score/${scoreId}" method="POST">
+          <div class="form-group">
+            <label for="name">Name</label>
+            <input class="form-control" type="text" name="name" id="name" required>
+          </div>
+          <input type="submit" value="Submit" class="btn btn-success">
+        </form>
+      `;
+      /* eslint-enable max-len */
+    }
     document.querySelector('#message').innerHTML = `
       <div class="alert alert-${alertType}">
         <p>${msg}</p>
         <button id="new-game" class="btn btn-${alertType}">New Game</button>
+        ${form}
       </div>
     `;
   };
 
   newGame = () => {
+    if (gameId && gameState === 2) {
+      location.reload();
+    }
     gameState = 0;
     currentMines = numOfMines;
     document.querySelector('#mines').textContent = currentMines;
@@ -280,6 +395,41 @@
       }
       mines[i] = new Array(height);
       flags[i] = new Array(height);
+    }
+  };
+
+  postData = (url, data, callback) => {
+    if (!gameId) return;
+    const headers = new Headers();
+    headers.append('Content-Type', 'application/json');
+    const options = {
+      method: 'POST',
+      headers: headers,
+      cache: 'default',
+      body: JSON.stringify({data}),
+    };
+    const request = new Request(url, options);
+    return fetch(request)
+    .then((res) => {
+      return res.json();
+    })
+    .then((resData) => {
+      console.log(resData);
+      if (callback) {
+        return callback(resData);
+      }
+    })
+    .catch((err) => {
+      console.log(err);
+    });
+  };
+
+  sendMove = (callback) => {
+    if (gameId && currentBlocks.length > 0) {
+      postData(`/game/update/${gameId}`, {
+        blocks: currentBlocks,
+      }, callback);
+      currentBlocks = [];
     }
   };
 
