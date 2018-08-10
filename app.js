@@ -18,7 +18,7 @@ app.get('/', (req, res) => {
   .select('name score').sort('score').limit(10).exec()
   .then((foundGames) => {
     results.easy = foundGames;
-    return Game.find({difficulty: 'mediun', state: 2})
+    return Game.find({difficulty: 'medium', state: 2})
     .select('name score').sort('score').limit(10).exec();
   })
   .then((foundGames) => {
