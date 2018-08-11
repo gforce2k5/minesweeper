@@ -18,6 +18,7 @@
   let timer;
   let currentMines;
   let currentBlocks = [];
+  let readyToPlay = false;
 
   init = (curX, curY) => {
     start = new Date().getTime();
@@ -29,8 +30,10 @@
       }, (data) => {
         mines = data;
         timer = runTimer();
+        readyToPlay = true;
       });
     } else {
+      readyToPlay = true;
       timer = runTimer();
       const grid = [];
       for (let i = 0; i < width; i++) {
@@ -86,7 +89,7 @@
           makeMove(evt, x, y, el);
         }
         return;
-      } else if (gameState === 2) {
+      } else if (gameState === 2 || !readyToPlay) {
         return;
       }
       makeMove(evt, x, y, el);
@@ -335,6 +338,7 @@
   };
 
   newGame = () => {
+    readyToPlay = false;
     if (gameId && gameState === 2) {
       location.reload();
     }
