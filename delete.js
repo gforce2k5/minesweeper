@@ -11,11 +11,11 @@ Game.deleteMany({state: 0}).where('start').lt(Date.now() - 24 * 60 * 60 * 1000)
     24 * 60 * 60 * 1000);
 })
 .then(() => {
-  return Game.deleteMany({state: 3}).where('start').lt(Date.now() -
-    24 * 60 * 60 * 1000);
+  return Game.deleteMany({state: 3});
 })
 .then(() => {
-  Score.deleteMany({}).where('time').lt(Date.now() - 24 * 60 * 60 * 1000);
+  return Score.deleteMany({}).where('time').lt(Date.now() -
+    24 * 60 * 60 * 1000);
 })
 .then(() => {
   console.log('done');
