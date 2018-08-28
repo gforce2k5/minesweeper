@@ -224,9 +224,8 @@ app.post('/game/update/:id', (req, res) => {
 app.post('/game/mine/:id', (req, res) => {
   Game.findById(req.params.id)
   .then((foundGame) => {
-    if (foundGame.ip === req.ip) {
-      foundGame.state = 3;
-      return foundGame.save();
+    if (foundGame.ip === req.ip && foundGame.state != 2) {
+      return Game.findByIdAndRemove(foundGame.id);
     }
   })
   .catch((err) => {
